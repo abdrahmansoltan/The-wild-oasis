@@ -4,7 +4,7 @@ import { getCabins } from '../../services/apiCabins';
 import Spinner from '../../ui/Spinner';
 import CabinRow from './CabinRow';
 
-const Table = styled.table`
+const Table = styled.div`
   border: 1px solid var(--color-grey-200);
   border-radius: 7px;
   font-size: 1.4rem;
