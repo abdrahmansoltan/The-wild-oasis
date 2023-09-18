@@ -12,7 +12,8 @@ import { Textarea } from '../../ui/Textarea';
 
 function CreateCabinForm() {
   // React Hook Form
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit, formState, reset, getValues } = useForm();
+  const { errors } = formState;
 
   // React Query
   const queryClient = useQueryClient();
@@ -34,24 +35,70 @@ function CreateCabinForm() {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <FormRow label='Cabin name'>
-        <Input type='text' id='name' {...register('name')} />
+      <FormRow label='Cabin name' error={errors?.name?.message}>
+        <Input
+          type='text'
+          id='name'
+          disabled={isCreating}
+          {...register('name', {
+            required: 'This field is required'
+          })}
+        />
       </FormRow>
 
-      <FormRow label='Maximum capacity'>
-        <Input type='number' id='maxCapacity' {...register('maxCapacity')} />
+      <FormRow label='Maximum capacity' error={errors?.maxCapacity?.message}>
+        <Input
+          type='number'
+          id='maxCapacity'
+          disabled={isCreating}
+          {...register('maxCapacity', {
+            required: 'This field is required',
+            min: {
+              value: 1,
+              message: 'Capacity must be at least 1'
+            }
+          })}
+        />
       </FormRow>
 
-      <FormRow label='Regular price'>
-        <Input type='number' id='regularPrice' {...register('regularPrice')} />
+      <FormRow label='Regular price' error={errors?.regularPrice?.message}>
+        <Input
+          type='number'
+          id='regularPrice'
+          disabled={isCreating}
+          {...register('regularPrice', {
+            required: 'This field is required',
+            min: {
+              value: 50,
+              message: 'Price must be at least 50'
+            }
+          })}
+        />
       </FormRow>
 
-      <FormRow label='Discount'>
-        <Input type='number' id='discount' defaultValue={0} {...register('discount')} />
+      <FormRow label='Discount' error={errors?.discount?.message}>
+        <Input
+          type='number'
+          id='discount'
+          disabled={isCreating}
+          defaultValue={0}
+          {...register('discount', {
+            required: 'This field is required',
+            validate: value =>
+              value > getValues('regularPrice') || 'Discount must be less than regular price'
+          })}
+        />
       </FormRow>
 
-      <FormRow label='Description for website'>
-        <Textarea type='number' id='description' {...register('description')} />
+      <FormRow label='Description for website' error={errors?.description?.message}>
+        <Textarea
+          type='number'
+          id='description'
+          disabled={isCreating}
+          {...register('description', {
+            required: 'This field is required'
+          })}
+        />
       </FormRow>
 
       <FormRow label='Cabin photo'>
