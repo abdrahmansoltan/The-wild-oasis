@@ -1,52 +1,29 @@
 import { useForm } from 'react-hook-form';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
-import { createOrEditCabin } from '../../services/apiCabins';
 import Button from '../../ui/Button';
 import FileInput from '../../ui/FileInput';
 import Form from '../../ui/Form';
 import FormRow from '../../ui/FormRow';
 import Input from '../../ui/Input';
 import { Textarea } from '../../ui/Textarea';
+import { useCreateCabin } from './useCreateCabin';
+import { useEditCabin } from './useEditCabin';
 
 function CreateCabinForm({ cabinToEdit }) {
   // Destructure the cabinToEdit object
   const { id: editId, ...editValues } = cabinToEdit || {};
   const isEditSession = Boolean(editId); // true if editId exists
 
+  // React Query
+  const { isCreating, createCabin } = useCreateCabin();
+  const { isEditing, editCabin } = useEditCabin();
+  const isProcessing = isCreating || isEditing;
+
   // React Hook Form
   const { register, handleSubmit, formState, reset, getValues } = useForm({
     defaultValues: isEditSession ? editValues : {}
   });
   const { errors } = formState;
-
-  // React Query
-  const queryClient = useQueryClient();
-  const { mutate: createCabin, isLoading: isCreating } = useMutation({
-    mutationFn: createOrEditCabin,
-    onSuccess: () => {
-      toast.success('New cabin successfully created');
-      queryClient.invalidateQueries('cabins'); // refetch cabins
-      reset(); // reset form
-    },
-    onError: () => {
-      toast.error('Something went wrong');
-    }
-  });
-
-  const { mutate: editCabin, isLoading: isEditing } = useMutation({
-    mutationFn: ({ newCabinData, id }) => createOrEditCabin(newCabinData, id),
-    onSuccess: () => {
-      toast.success('Cabin edited successfully');
-      queryClient.invalidateQueries('cabins'); // refetch cabins
-    },
-    onError: () => {
-      toast.error('Something went wrong');
-    }
-  });
-
-  const isProcessing = isCreating || isEditing;
 
   function onSubmit(data) {
     const formData = {
@@ -56,12 +33,23 @@ function CreateCabinForm({ cabinToEdit }) {
 
     // Edit existing cabin
     if (isEditSession) {
-      editCabin({ newCabinData: formData, id: editId });
+      editCabin(
+        { newCabinData: formData, id: editId },
+        {
+          onSuccess: () => {
+            reset(); // reset form
+          }
+        }
+      );
       return;
     }
 
     // Create new cabin
-    createCabin(formData);
+    createCabin(formData, {
+      onSuccess: () => {
+        reset(); // reset form
+      }
+    });
   }
 
   return (
