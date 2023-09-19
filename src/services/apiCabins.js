@@ -14,21 +14,11 @@ export async function getCabins() {
 export async function createOrEditCabin(newCabin, id) {
   const hasImagePath = newCabin.image?.startsWith?.(supabaseUrl); // Check if image is already uploaded to bucket
 
-  // Upload image to bucket
+  // prepare image to be uploaded to bucket
   const imageName = `${Math.random()}-${newCabin.image.name}`.replaceAll('/', ''); // Create unique name for image + remove slashes to avoid creating bucket folders
   const imagePath = hasImagePath
     ? newCabin.image
     : `${supabaseUrl}/storage/v1/object/public/cabin-images/${imageName}`; // Create path to image in bucket
-  const { error: storageError } = await supabase.storage
-    .from('cabin-images')
-    .upload(imageName, newCabin.image); // Upload image to bucket
-
-  // Delete the cabin if the image upload fails
-  if (storageError) {
-    await supabase.from('cabins').delete().eq('id', newCabin.id);
-    console.error(storageError);
-    throw new Error('Cabin image could not be uploaded and the cabin was not created');
-  }
 
   // Create cabin
   let query = supabase.from('cabins');
@@ -42,9 +32,21 @@ export async function createOrEditCabin(newCabin, id) {
 
   const { data, error } = await query.select().single();
 
+  // Upload image to bucket
+  if (hasImagePath) return; // If image is already uploaded to bucket, return
+  const { error: storageError } = await supabase.storage
+    .from('cabin-images')
+    .upload(imageName, newCabin.image); // Upload image to bucket
+
   if (error) {
     console.error(error);
     throw new Error('Cabin could not be created');
+  }
+  // Delete the cabin if the image upload fails
+  if (storageError) {
+    await supabase.from('cabins').delete().eq('id', newCabin.id);
+    console.error(storageError);
+    throw new Error('Cabin image could not be uploaded and the cabin was not created');
   }
 
   return data;
