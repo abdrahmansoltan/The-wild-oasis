@@ -9,7 +9,7 @@ import { Textarea } from '../../ui/Textarea';
 import { useCreateCabin } from './useCreateCabin';
 import { useEditCabin } from './useEditCabin';
 
-function CreateCabinForm({ cabinToEdit }) {
+function CreateCabinForm({ cabinToEdit, onCloseModal }) {
   // Destructure the cabinToEdit object
   const { id: editId, ...editValues } = cabinToEdit || {};
   const isEditSession = Boolean(editId); // true if editId exists
@@ -38,6 +38,7 @@ function CreateCabinForm({ cabinToEdit }) {
         {
           onSuccess: () => {
             reset(); // reset form
+            onCloseModal?.();
           }
         }
       );
@@ -48,12 +49,13 @@ function CreateCabinForm({ cabinToEdit }) {
     createCabin(formData, {
       onSuccess: () => {
         reset(); // reset form
+        onCloseModal?.();
       }
     });
   }
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={handleSubmit(onSubmit)} type={onCloseModal ? 'modal' : 'regular'}>
       <FormRow label='Cabin name' error={errors?.name?.message}>
         <Input
           type='text'
@@ -136,7 +138,8 @@ function CreateCabinForm({ cabinToEdit }) {
 
       <FormRow>
         {/* type is an HTML attribute! */}
-        <Button variation='secondary' type='reset'>
+        <Button variation='secondary' type='reset' onClick={() => onCloseModal?.()}>
+          {/* optional chaining to prevent error */}
           Cancel
         </Button>
         <Button disabled={isProcessing}>{isEditSession ? 'Edit cabin' : 'Create new cabin'}</Button>
