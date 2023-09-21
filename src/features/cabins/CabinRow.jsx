@@ -1,5 +1,6 @@
 import { HiPencil, HiSquare2Stack, HiTrash } from 'react-icons/hi2';
 import styled from 'styled-components';
+import ConfirmDelete from '../../ui/ConfirmDelete';
 import Modal from '../../ui/Modal';
 import { formatCurrency } from '../../utils/helpers';
 import CreateCabinForm from './CreateCabinForm';
@@ -71,6 +72,7 @@ function CabinRow({ cabin }) {
       <div role='cell'>Fits up to {maxCapacity} guests</div>
       <Price role='cell'>{formatCurrency(regularPrice)}</Price>
       {discount ? <Discount role='cell'>{discount}</Discount> : <span role='cell'>&mdash;</span>}
+
       <div>
         <button onClick={handleDuplicate} disabled={isCreating}>
           <HiSquare2Stack />
@@ -86,11 +88,21 @@ function CabinRow({ cabin }) {
           <Modal.Window name='edit-cabin'>
             <CreateCabinForm cabinToEdit={cabin} />
           </Modal.Window>
-        </Modal>
 
-        <button onClick={() => deleteCabin(cabinId)} disabled={isDeleting}>
-          <HiTrash />
-        </button>
+          {/* Delete cabin */}
+          <Modal.Open opens='delete-cabin'>
+            <button>
+              <HiTrash />
+            </button>
+          </Modal.Open>
+          <Modal.Window name='delete-cabin'>
+            <ConfirmDelete
+              resource='cabin'
+              onConfirm={() => deleteCabin(cabinId)}
+              disabled={isDeleting}
+            />
+          </Modal.Window>
+        </Modal>
       </div>
     </TableRow>
   );
