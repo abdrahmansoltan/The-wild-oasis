@@ -10,6 +10,7 @@ import Table from '../../ui/Table';
 import Tag from '../../ui/Tag';
 
 // Helpers
+import { useNavigate } from 'react-router-dom';
 import { formatCurrency, formatDistanceFromNow } from '../../utils/helpers';
 
 const Cabin = styled.div`
@@ -53,6 +54,8 @@ function BookingRow({
     cabins: { name: cabinName }
   }
 }) {
+  const navigate = useNavigate();
+
   const statusToTagName = {
     unconfirmed: 'blue',
     'checked-in': 'green',
@@ -87,16 +90,16 @@ function BookingRow({
         <Menus.Menu>
           <Menus.Toggle id={bookingId} />
           <Menus.List id={bookingId}>
-            <Menus.Button icon={<HiEye />}>See details</Menus.Button>
+            <Menus.Button icon={<HiEye />} onClick={() => navigate(`/bookings/${bookingId}`)}>
+              See details
+            </Menus.Button>
 
             {status === 'unconfirmed' && (
               <Menus.Button icon={<HiArrowDownOnSquare />}>Check in</Menus.Button>
             )}
 
             {status === 'checked-in' && (
-              <Menus.Button icon={<HiArrowUpOnSquare />} disabled={isCheckingOut}>
-                Check out
-              </Menus.Button>
+              <Menus.Button icon={<HiArrowUpOnSquare />}>Check out</Menus.Button>
             )}
 
             <Modal.Open opens='delete'>
