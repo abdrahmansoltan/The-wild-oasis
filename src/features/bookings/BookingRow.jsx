@@ -12,6 +12,7 @@ import Tag from '../../ui/Tag';
 // Helpers
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency, formatDistanceFromNow } from '../../utils/helpers';
+import { useCheckout } from '../check-in-out/useCheckout';
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -55,6 +56,7 @@ function BookingRow({
   }
 }) {
   const navigate = useNavigate();
+  const { checkout, isCheckingOut } = useCheckout();
 
   const statusToTagName = {
     unconfirmed: 'blue',
@@ -103,7 +105,12 @@ function BookingRow({
             )}
 
             {status === 'checked-in' && (
-              <Menus.Button icon={<HiArrowUpOnSquare />}>Check out</Menus.Button>
+              <Menus.Button
+                icon={<HiArrowUpOnSquare />}
+                onClick={() => checkout(bookingId)}
+                disabled={isCheckingOut}>
+                Check out
+              </Menus.Button>
             )}
 
             <Modal.Open opens='delete'>
